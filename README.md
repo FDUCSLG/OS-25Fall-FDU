@@ -4,7 +4,7 @@ Lab repository for OS Fall 2025 at Fudan University
 
 这是复旦大学 2025 年秋季学期《操作系统（H）》课程的配套实验内容。我们将建立一个基于 ARM 架构的简易教学操作系统。
 
-[实验文档](https://osh.fducslg.com)
+[实验文档](https://osh2025.fducslg.com/)
 
 暂定的实验内容将包括：
 
