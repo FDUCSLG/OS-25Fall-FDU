@@ -10,6 +10,8 @@ static volatile bool boot_secondary_cpus = false;
 void main() {
     if (cpuid() == 0) {
         /* @todo: Clear BSS section.*/
+        extern char edata[], end[];
+        memset(edata, 0, (usize)(end - edata));
 
         smp_init();
         uart_init();
@@ -17,15 +19,9 @@ void main() {
 
         /* initialize kernel memory allocator */
         kinit();
-        printk("hello, world! (Core 0)\n");
-
-        
-        // printk("edata is %p; end is %p\n", (void*)edata, (void*)end);
-
-        /* @todo: Print "Hello, world! (Core 0)" */
 
         arch_fence();
-
+        printk("hello, world! (Core 0)\n");
         // Set a flag indicating that the secondary CPUs can start executing.
         boot_secondary_cpus = true;
     } else {
