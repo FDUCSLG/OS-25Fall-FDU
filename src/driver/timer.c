@@ -43,17 +43,18 @@ static void reload_timer(u64 interval_ms)
 
 void timerintr()
 {
+    //printk("[TIMER] CPU %lld: timer interrupt\n", cpuid());
     disable_timer();
     reload_timer(atimer.interval_ms);
-    printk("CPU %lld: living\n", cpuid());
+    printk("[CPU] CPU %lld: living\n", cpuid());
     enable_timer();
 }
 
 void timer_init(u64 interval_ms)
 {
     atimer.interval_ms = interval_ms;
-
     set_interrupt_handler(TIMER_IRQ, timerintr);
+    printk("[CPU] Timer initialized with interval %lld ms\n", interval_ms);
 }
 
 void timer_init_percpu()

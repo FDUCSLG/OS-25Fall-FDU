@@ -16,46 +16,40 @@ static volatile bool boot_secondary_cpus = false;
 void main()
 {
     if (cpuid() == 0) {
-        /* @todo: Clear BSS section.*/
+        printk("========= Booting ==========\n");
         extern char edata[], end[];
         memset(edata, 0, (usize)(end - edata));
-
+        printk("[KERNEL] BSS section cleared: %p - %p\n", edata, end);
         /* initialize interrupt handler */
         init_interrupt();
-
+        /* initialize uart and printk */
         uart_init();
         printk_init();
-
+        /* initialize GICv3 */
         gicv3_init();
         gicv3_init_percpu();
-
+        /* initialize timer */
         timer_init(1000);
         timer_init_percpu();
-
         /* initialize kernel memory allocator */
         kinit();
-
         /* initialize sched */
         init_sched();
-
         /* initialize kernel proc */
         init_kproc();
-
+        /* initialize smp */
         smp_init();
-
+        //printk("CPU 0 are booted.\n");
         arch_fence();
-        printk("hello, world! (Core 0)\n");
         // Set a flag indicating that the secondary CPUs can start executing.
         boot_secondary_cpus = true;
+        printk("========== Booted ==========\n");
     } else {
         while (!boot_secondary_cpus)
             ;
         arch_fence();
         timer_init_percpu();
         gicv3_init_percpu();
-        printk("hello, world! (Core %lld)\n", cpuid());
-        /* @todo: Print "Hello, world! (Core <core id>)" */
     }
-
     set_return_addr(idle_entry);
 }

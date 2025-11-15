@@ -10,7 +10,7 @@ static InterruptHandler int_handler[NUM_IRQ_TYPES];
 
 static void default_handler(u32 intid)
 {
-    printk("[Error CPU %lld]: Interrupt %d not implemented.", cpuid(), intid);
+    printk("\033[1;31m[Error CPU %lld]: Interrupt %d not implemented.\033[0m\n", cpuid(), intid);
     PANIC();
 }
 
@@ -28,11 +28,13 @@ void set_interrupt_handler(InterruptType type, InterruptHandler handler)
 
 void interrupt_global_handler()
 {
+    //printk("[Interrupt] Interrupt occurred on CPU %lld.\n", cpuid());
     u32 iar = gic_iar();
     u32 intid = iar & 0x3ff;
 
     if (intid == 1023) {
-        printk("[Warning]: Spurious Interrupt.\n");
+        
+        printk("\033[1;31m[Warning]: Spurious Interrupt.\033[0m\n");
         return;
     }
 

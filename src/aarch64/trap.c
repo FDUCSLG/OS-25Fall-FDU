@@ -7,6 +7,7 @@
 
 void trap_global_handler(UserContext *context)
 {
+    //printk("[TRAP] Trap occurred! ELR=0x%llx, ESR=0x%llx\n", context->elr, arch_get_esr());
     thisproc()->ucontext = context;
 
     u64 esr = arch_get_esr();
