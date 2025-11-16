@@ -19,12 +19,20 @@ mrs x0, spsr_el1
 mrs x1, elr_el1
 pushp(x0,x1)
 
+mrs x0, sp_el0
+mrs x1, sp_el0
+pushp(x0,x1)
+
 mov x0, sp
 bl trap_global_handler
 
 .global trap_return
 trap_return:
 // TODO: restore UserContext
+
+popp(x0,x1)
+msr sp_el0, x0
+msr sp_el0, x1
 
 popp(x0,x1)
 msr spsr_el1, x0

@@ -28,7 +28,6 @@ void main()
         /* initialize GICv3 */
         gicv3_init();
         gicv3_init_percpu();
-x
         init_clock_handler();
 
         /* initialize kernel memory allocator */
