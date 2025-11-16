@@ -1,0 +1,257 @@
+[project]
+name = "pwndbg"
+version = "2025.10.20"
+description = "Exploit Development and Reverse Engineering with GDB Made Easy"
+authors = [{ name = "Dominik 'disconnect3d' Czarnota", email = "dominik.b.czarnota+dc@gmail.com" }]
+requires-python = ">=3.10, <4"
+readme = "README.md"
+dependencies = [
+    "capstone==6.0.0a5",
+    "unicorn>=2.1.4,<3",
+    "pwntools>=4.14.1,<5",
+    "sortedcontainers>=2.4.0,<3",
+    "tabulate>=0.9.0,<0.10",
+    "typing-extensions>=4.15.0,<5",
+    "pycparser~=2.23",
+    "pyelftools>=0.32,<0.33",
+    "pygments>=2.19.2,<3",
+    "psutil>=7.0.0,<8",
+    # We install uv to the venv
+    "uv>=0.8.14",
+    # Optional? only for 'ipi' command
+    "ipython>=8.37.0,<9",
+    # Optional? only for 'ropgadget' command
+    "ropgadget==7.6",
+    # Optional? only for 'ai' commands
+    "requests>=2.32.5,<3",
+    # Optional? only for pretty print traceback
+    "rich>=14.1.0,<15",
+    # Optional? only for qemu-system vmmap
+    "pt",
+    # Optional? 'ziglang' must be optional, as it is not available on every platform.
+    # It is only used for the 'cymbol' command and some `asm` functionality.
+    "ziglang==0.14.1",
+]
+
+[project.optional-dependencies]
+lldb = [
+    # The LLDB REPL requires readline.
+    'gnureadline>=8.2.13,<9; sys_platform != "win32"',
+    'pyreadline3>=3.5.4,<4; sys_platform == "win32"',
+    "lldb-for-pwndbg==20.1.8.post1",
+]
+gdb = [
+    "gdb-for-pwndbg==16.3.0.post1",
+]
+
+[dependency-groups]
+dev = [
+    "sortedcontainers-stubs>=2.4.3,<3",
+    "types-pygments>=2.19.0.20250809,<3",
+    "types-requests>=2.32.4.20250809,<3",
+    "types-tabulate>=0.9.0.20240106,<0.10",
+    "types-gdb>=12.1.4.20240704,<13",
+    "types-psutil>=7.0.0.20250601,<8",
+]
+lint = [
+    # Newer mypy has more types to fix. Please fix types in the future.
+    "mypy==1.13.0",
+    "isort>=5.13.2,<6",
+    "ruff>=0.4.1,<0.5",
+    "vermin>=1.6.0,<2",
+]
+tests = [
+    # Newer versions of pytest break CI on GitHub
+    "pytest==8.0.2",
+    "pytest-cov>=4.1.0,<5",
+    "coverage[toml]>=7.5.0,<8",
+]
+docs = [
+    "mdutils",
+    "mkdocs",
+    "mkdocs-gen-files",
+    "mkdocs-material",
+    "mkdocs-minify-plugin",
+    "mkdocs-rss-plugin",
+    "mkdocstrings",
+    "mkdocstrings-python",
+    "pymdown-extensions",
+    "mkdocs-api-autonav",
+    "griffe-modernized-annotations",
+    # Used by mkdocstrings to format source.
+    "ruff",
+    "mike",
+    "mkdocs-awesome-nav",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+ignore = ["A003", "E402", "E501", "E731", "F405", "F821", "W505"]
+
+select = [
+    "A",      # flake8-builtins
+    "E",      # pycodestyle
+    "F",      # pyflakes
+    "W",      # pycodestyle
+    "C4",     # flake8-comprehensions
+    "ISC",    # flake8-implicit-str-concat
+    "SLOT",   # flake8-slots
+    "FLY",    # flynt
+    "PGH",    # pygrep-hooks
+    "RET506", # flake8-return: superfluous-else-raise
+    "RET507", # flake8-return: superfluous-else-continue
+    "RET508", # flake8-return: superfluous-else-break
+    # We want to enable the below lints, but they currently return too many errors
+    # "RET505", # flake8-return: superfluous-else-return
+    # "SLF" # flake8-self
+    # "SIM", # flake8-simplify
+    # "PTH", # flake8-use-pathlib
+]
+
+[tool.uv]
+default-groups = []
+
+[tool.uv.sources]
+pt = { git = "https://github.com/martinradev/gdb-pt-dump", rev = "50227bda0b6332e94027f811a15879588de6d5cb" }
+
+[tool.ruff.lint.flake8-builtins]
+builtins-ignorelist = [
+    "all",
+    "bin",
+    "breakpoint",
+    "copyright",
+    "dir",
+    "exit",
+    "format",
+    "hex",
+    "map",
+    "max",
+    "min",
+    "next",
+    "type",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["/pwndbg", "/pwndbginit"]
+
+[tool.hatch.build.targets.wheel]
+include = ["/pwndbg", "/pwndbginit"]
+
+[project.scripts]
+pwndbg = "pwndbginit.pwndbg_gdb:main"
+pwndbg-lldb = "pwndbginit.pwndbg_lldb:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.mypy]
+strict_optional = false
+check_untyped_defs = true
+allow_untyped_globals = false
+allow_redefinition = true
+allow_any_generics = false
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+# warn_return_any = true
+# warn_unreachable = true
+show_error_context = true
+pretty = true
+show_error_codes = true
+incremental = false
+disable_error_code = [
+    # https://github.com/python/mypy/issues/6232
+    "assignment",
+]
+
+[[tool.mypy.overrides]]
+module = ["pwndbg.aglib.elf"]
+disable_error_code = ["name-defined"]
+
+[[tool.mypy.overrides]]
+module = [
+    "pwndbg.aglib.arch",
+    "pwndbg.color.*",
+    "pwndbg.commands.context",
+    "pwndbg.commands.cymbol",
+    "pwndbg.commands.hexdump",
+    "pwndbg.commands.procinfo",
+    "pwndbg.commands.reload",
+    "pwndbg.commands.version",
+    "pwndbg.exception",
+    "pwndbg.aglib.dynamic",
+    "pwndbg.gdblib.events",
+    "pwndbg.gdblib.got",
+    "pwndbg.gdblib.ptmalloc2_tracking",
+    "pwndbg.aglib.heap.*",
+    "pwndbg.hexdump",
+    "pwndbg.ui",
+    "pwndbg.wrappers.*",
+]
+disable_error_code = ["attr-defined"]
+
+[[tool.mypy.overrides]]
+module = ["pwndbg.commands.telescope"]
+disable_error_code = ["attr-defined", "index"]
+
+[[tool.mypy.overrides]]
+module = ["pwndbg.aglib.kernel.nftables"]
+disable_error_code = ["no-redef"]
+
+[[tool.mypy.overrides]]
+module = [
+    "pwndbg.aglib.nearpc",
+    "pwndbg.aglib.typeinfo",
+]
+disable_error_code = ["name-defined", "attr-defined"]
+
+[[tool.mypy.overrides]]
+module = ["pwndbg.aglib.disasm.*"]
+disable_error_code = ["index", "name-defined", "attr-defined"]
+
+[[tool.mypy.overrides]]
+module = [
+    "capstone.*",
+    "unicorn.*",
+    "pwnlib.*",
+    "ropgadget.*",
+    "elftools.*",
+    "ipdb.*",
+    "r2pipe",
+    "rzpipe",
+    "rich.*",
+    "pt.*",
+    "lldb.*",
+    "gnureadline",
+    "lief",
+]
+ignore_missing_imports = true
+
+[tool.isort]
+profile = "black"
+force_single_line = true
+known_third_party = [
+    "capstone",
+    "unicorn",
+    "pycparser",
+    "gdb",
+    "lldb",
+]
+add_imports = "from __future__ import annotations"
+
+[tool.coverage.run]
+branch = true
+parallel = true
+disable_warnings = ["module-not-imported"]
+source = ["${SRC_DIR-.}"]
+omit = ["ida_script.py"]
+data_file = ".cov/coverage"
+
+[tool.coverage.report]
+omit = ["ida_script.py", "tests/*"]

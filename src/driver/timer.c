@@ -28,3 +28,11 @@ bool timer_enabled()
     u64 c = get_cntv_ctl_el0();
     return c & 1;
 }
+
+void reload_timer(u64 interval_ms)
+{
+    u64 interval_us = interval_ms * 1000;
+    u64 interval_clk = interval_us * (get_clock_frequency() / 1000000);
+
+    set_cntv_tval_el0(interval_clk);
+}

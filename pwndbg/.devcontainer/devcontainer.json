@@ -1,0 +1,55 @@
+{
+    "name": "pwndbg",
+    "build": {
+        "args": {},
+        "context": "..",
+        "dockerfile": "../Dockerfile"
+    },
+    "features": {},
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "docker.languageserver.formatter.ignoreMultilineInstructions": true,
+                "editor.formatOnSave": true,
+                "files.exclude": {
+                    "**/.git/**": true,
+                    "**/.mypy_cache/**": true,
+                    "**/__pycache__/**": true
+                },
+                "files.watcherExclude": {
+                    "**/.git/**": true,
+                    "**/.mypy_cache/**": true,
+                    "**/.venv/**": true,
+                    "**/__pycache__/**": true
+                },
+                "python.analysis.diagnosticMode": "workspace",
+                "python.analysis.typeCheckingMode": "strict",
+                "python.languageServer": "Pylance",
+                "python.linting.pylintUseMinimalCheckers": false,
+                "python.venvPath": "/venv",
+                "[python]": {
+                    "editor.defaultFormatter": "charliermarsh.ruff",
+                    "editor.codeActionsOnSave": {
+                        "source.organizeImports": "explicit"
+                    },
+                    "editor.formatOnType": true
+                },
+                "ruff.organizeImports": false
+            },
+            "extensions": [
+                "charliermarsh.ruff",
+                "ms-azuretools.vscode-docker",
+                "ms-python.isort",
+                "ms-python.mypy-type-checker",
+                "ms-python.python",
+                "ms-python.vscode-pylance"
+            ]
+        }
+    },
+    "runArgs": [
+        "--cap-add=SYS_PTRACE",
+    ],
+    "remoteUser": "vscode",
+    "workspaceFolder": "/pwndbg",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/pwndbg,type=bind,consistency=cached"
+}

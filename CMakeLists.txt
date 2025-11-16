@@ -49,6 +49,13 @@ add_custom_target(debug
             -ex "file ${kernel_elf}"
             -ex "target remote localhost:1234"
     DEPENDS kernel)
+add_custom_target(pwn
+    COMMAND pwndbg-dev --nx --quiet
+            -ex "set architecture aarch64"
+            -ex "file ${kernel_elf}"
+            -ex "target remote localhost:1234"
+    DEPENDS kernel)
+
 
 # if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
 # 	add_custom_target(init_libc

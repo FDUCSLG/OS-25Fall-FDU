@@ -7,6 +7,8 @@
 
 struct sched {
     // TODO: customize your sched info
+    Proc* thisproc;  // cpu当前正在运行的进程
+    Proc* idle;  // 每个cpu都有一个idle进程（记录main函数的上下文自然演化而来）
 };
 
 struct cpu {

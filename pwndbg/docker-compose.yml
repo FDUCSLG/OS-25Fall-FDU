@@ -1,0 +1,55 @@
+services:
+  base: &base-spec
+    build: .
+    platform: linux/amd64
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
+  main:
+    <<: *base-spec
+    volumes:
+      - .:/pwndbg
+
+  ubuntu22.04:
+    <<: *base-spec
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        image: ubuntu:22.04
+  
+  ubuntu24.04:
+    <<: *base-spec
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        image: ubuntu:24.04
+
+  ubuntu24.04-mount:
+    <<: *base-spec
+    build:
+      context: .
+      target: base
+      dockerfile: Dockerfile
+      args:
+        image: ubuntu:24.04
+    volumes:
+      - .:/pwndbg
+
+  debian12:
+    <<: *base-spec
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        image: debian:12
+
+  archlinux:
+    <<: *base-spec
+    build:
+      context: .
+      dockerfile: Dockerfile.arch
+      args:
+        image: archlinux:latest
