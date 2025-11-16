@@ -61,30 +61,36 @@ void init_pgdir(struct pgdir *pgdir)
 
 void free_pgdir(struct pgdir *pgdir)
 {
-    // TODO:
-    // Free pages used by the page table. If pgdir->pt=NULL, do nothing.
-    // DONT FREE PAGES DESCRIBED BY THE PAGE TABLE
+    // Free only page-table pages. Do NOT free physical pages described by leaf PTEs.
     PTEntriesPtr pt0 = pgdir->pt;
-    if(pt0 == NULL) return;
-    for(int i=0;i<N_PTE_PER_TABLE;++i){
-        if(pt0[i] & PTE_VALID){
-            PTEntriesPtr pt1 = (PTEntriesPtr)P2K(PTE_ADDRESS(pt0[i]));
-            for(int j=0;j<N_PTE_PER_TABLE;++j){
-                if(pt1[j] & PTE_VALID){
-                    PTEntriesPtr pt2 = (PTEntriesPtr)P2K(PTE_ADDRESS(pt1[j]));
-                    for(int k=0;k<N_PTE_PER_TABLE;++k){
-                        if(pt2[k] & PTE_VALID){
-                            PTEntriesPtr pt3 = (PTEntriesPtr)P2K(PTE_ADDRESS(pt2[k]));
-                            kfree_page((void*)pt3);
+    if (pt0 == NULL) return;
+
+    for (int i = 0; i < N_PTE_PER_TABLE; ++i) {
+        PTEntry pte0 = pt0[i];
+        if ((pte0 & PTE_VALID) && (pte0 & PTE_TABLE)) {
+            PTEntriesPtr pt1 = (PTEntriesPtr)P2K(PTE_ADDRESS(pte0));
+            for (int j = 0; j < N_PTE_PER_TABLE; ++j) {
+                PTEntry pte1 = pt1[j];
+                if ((pte1 & PTE_VALID) && (pte1 & PTE_TABLE)) {
+                    PTEntriesPtr pt2 = (PTEntriesPtr)P2K(PTE_ADDRESS(pte1));
+                    for (int k = 0; k < N_PTE_PER_TABLE; ++k) {
+                        PTEntry pte2 = pt2[k];
+                        if ((pte2 & PTE_VALID) && (pte2 & PTE_TABLE)) {
+                            PTEntriesPtr pt3 = (PTEntriesPtr)P2K(PTE_ADDRESS(pte2));
+                            kfree_page((void *)pt3);
+                            pt2[k] = 0;
                         }
                     }
-                    kfree_page((void*)pt2);
+                    kfree_page((void *)pt2);
+                    pt1[j] = 0;
                 }
             }
-            kfree_page((void*)pt1);
+            kfree_page((void *)pt1);
+            pt0[i] = 0;
         }
     }
-    kfree_page((void*)pgdir->pt);
+
+    kfree_page((void *)pgdir->pt);
     pgdir->pt = NULL;
 }
 
