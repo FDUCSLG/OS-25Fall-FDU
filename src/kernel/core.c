@@ -3,6 +3,8 @@
 #include <kernel/printk.h>
 #include <kernel/sched.h>
 #include <test/test.h>
+#include <driver/virtio.h>
+#include <common/string.h> 
 
 volatile bool panic_flag;
 
@@ -36,8 +38,32 @@ NO_RETURN void kernel_entry()
     // user_proc_test();
     io_test();
 
-    /* LAB 4 TODO 3 BEGIN */
-    
+    /* LAB 4 TODO 3 BEGIN
+     * Read MBR (block 0) via virtio and parse partition table.
+     * We record the second partition (index 1) start LBA and size.
+     */
+    static u8 mbr_buf[512];
+    Buf tmp;
+    memset(&tmp, 0, sizeof(tmp));
+    tmp.block_no = 0;
+    tmp.flags = 0;
+    if (virtio_blk_rw(&tmp) != 0) {
+        printk("[ERROR] virtio_blk_rw failed for MBR\n");
+        PANIC();
+    }
+    for (int i = 0; i < 512; i++) {
+        mbr_buf[i] = tmp.data[i];
+    }
+    const MBR *mbr = (const MBR *)mbr_buf;
+    if (mbr->signature != 0xAA55) {
+        printk("[ERROR] Invalid MBR signature: 0x%04X\n", mbr->signature);
+        PANIC();
+    }
+    static u32 part2_lba;
+    part2_lba = mbr_partition2_lba(mbr);
+    static u32 part2_sectors;
+    part2_sectors = mbr_partition2_sectors(mbr);
+    printk("[MBR] part2 start LBA=%u sectors=%u\n", part2_lba, part2_sectors);
     /* LAB 4 TODO 3 END */
 
     while (1)

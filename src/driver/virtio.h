@@ -118,3 +118,23 @@ enum diskop {
 
 int virtio_blk_rw(Buf *b);
 void virtio_init(void);
+
+
+typedef struct __attribute__((packed)) {
+    u8  boot_indicator;   // 0x00
+    u8  chs_first[3];     // 0x01
+    u8  partition_type;   // 0x04
+    u8  chs_last[3];      // 0x05
+    u32 lba_start;        // 0x08  LBA of first absolute sector in the partition
+    u32 num_sectors;      // 0x0C  Number of sectors in partition
+} PartitionEntry;
+
+typedef struct __attribute__((packed)) {
+    u8 bootcode[446];         // 0x000
+    PartitionEntry pte[4];    // 0x1BE, 4 * 16B
+    u16 signature;            // 0x1FE (0xAA55)
+} MBR;
+
+/* helpers to access partition 2 (index 1) */
+static inline u32 mbr_partition2_lba(const MBR *m) { return m->pte[1].lba_start; }
+static inline u32 mbr_partition2_sectors(const MBR *m) { return m->pte[1].num_sectors; }
