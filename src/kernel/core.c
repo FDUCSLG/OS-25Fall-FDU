@@ -8,14 +8,20 @@ volatile bool panic_flag;
 
 NO_RETURN void idle_entry()
 {
+    //printk("[IDLE_ENTRY] idle_entry started on CPU%lld\n", cpuid());
     set_cpu_on();
     while (1) {
         yield();
-        if (panic_flag)
+        //printk("[IDLE_ENTRY] CPU%lld: back to idle\n", cpuid());
+        if (panic_flag){
+            //printk("[IDLE_ENTRY] CPU%lld: panic_flag is set\n", cpuid());
             break;
+        }
         arch_with_trap
         {
+            //printk("[IDLE_ENTRY] CPU%lld: going to WFI\n", cpuid());
             arch_wfi();
+            //printk("[IDLE_ENTRY] CPU%lld: WFI returned\n", cpuid());
         }
     }
     set_cpu_off();
@@ -40,13 +46,13 @@ NO_RETURN void kernel_entry()
 
 NO_INLINE NO_RETURN void _panic(const char *file, int line)
 {
-    printk("=====%s:%d PANIC%lld!=====\n", file, line, cpuid());
+    printk("\033[1;31m=====%s:%d PANIC%lld!=====\033[0m\n", file, line, cpuid());
     panic_flag = true;
     set_cpu_off();
     for (int i = 0; i < NCPU; i++) {
         if (cpus[i].online)
             i--;
     }
-    printk("Kernel PANIC invoked at %s:%d. Stopped.\n", file, line);
+    printk("\033[1;31mKernel PANIC invoked at %s:%d. Stopped.\033[0m\n", file, line);
     arch_stop_cpu();
 }
