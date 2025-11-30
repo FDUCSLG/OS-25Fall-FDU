@@ -115,11 +115,11 @@ int virtio_blk_rw(Buf *b)
     arch_fence();
 
     /* LAB 4 TODO 1 BEGIN */
-    
-    _lock_sem(&b->sem);
+
     release_spinlock(&disk.lk);
-    bool f = _wait_sem(&b->sem);
-    if (!f) {
+    _lock_sem(&b->sem);
+    bool ok = _wait_sem(&b->sem);
+    if (!ok) {
         PANIC();
     }
     acquire_spinlock(&disk.lk);
@@ -148,9 +148,7 @@ static void virtio_blk_intr()
 
         /* LAB 4 TODO 2 BEGIN */
         Buf *b = container_of((void*)disk.virtq.info[d0].buf, Buf, data);
-        if (b == NULL) {
-            
-        } else {
+        if (b ！= NULL) {
             post_sem(&b->sem);
         }
         /* LAB 4 TODO 2 END */
