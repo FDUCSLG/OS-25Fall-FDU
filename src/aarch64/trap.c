@@ -8,6 +8,7 @@
 
 void trap_global_handler(UserContext *context)
 {
+    //printk("[TRAP] Trap occurred! ELR=0x%llx, ESR=0x%llx\n", context->elr, arch_get_esr());
     thisproc()->ucontext = context;
 
     u64 esr = arch_get_esr();
@@ -33,20 +34,38 @@ void trap_global_handler(UserContext *context)
     case ESR_EC_IABORT_EL1:
     case ESR_EC_DABORT_EL0:
     case ESR_EC_DABORT_EL1: {
-        printk("Page fault\n");
+        printk("[ERROR] Page Fault Exception!\n");
+        u64 far = arch_get_far();
+        u64 elr = arch_get_elr();
+        u64 ttbr0 = arch_get_ttbr0();
+        int pid = thisproc() ? thisproc()->pid : -999;
+        // Decode ISS basic fields (DFSC/IFSC low 6 bits, WnR bit for Data Abort)
+        u64 fsc = iss & 0x3F; // Fault Status Code
+        u64 is_write = (iss >> 6) & 1; // WnR for DAbort
+        printk("[ERROR] pid=%d ec=0x%llx iss=0x%llx fsc=0x%llx wr=%llu FAR=0x%llx ELR=0x%llx TTBR0=0x%llx\n",
+               pid, ec, iss, fsc, is_write, far, elr, ttbr0);
+            // Extra diagnostics: current EL and SCTLR (to infer PAN/behavior)
+            u64 cur_el = arch_get_currentel();
+            u64 sctlr = arch_get_sctlr();
+            printk("[ERROR] CurrentEL=0x%llx SCTLR_EL1=0x%llx\n", cur_el, sctlr);
+        if (thisproc()) {
+            extern void pt_dump_va(struct pgdir*, u64);
+            pt_dump_va(&thisproc()->pgdir, far);
+        }
         PANIC();
     } break;
     default: {
-        printk("Unknwon exception %llu\n", ec);
+        printk("[ERROR] Unknwon exception %llu\n", ec);
         PANIC();
     }
     }
 
     // TODO: stop killed process while returning to user space
+    if (thisproc()->killed == true && ((context->elr) & 0xffff000000000000) == 0) exit(-1);
 }
 
 NO_RETURN void trap_error_handler(u64 type)
 {
-    printk("Unknown trap type %llu\n", type);
+    printk("[ERROR] Unknown trap type %llu\n", type);
     PANIC();
 }

@@ -16,6 +16,6 @@ void release_sched_lock();
 void sched(enum procstate new_state);
 
 // MUST call lock_for_sched() before sched() !!!
-#define yield() (acquire_sched_lock(), sched(RUNNABLE))
+#define yield() (/*printk("[SCHED]yielding...\n"),*/  acquire_sched_lock(), sched(RUNNABLE))
 
 WARN_RESULT Proc *thisproc();

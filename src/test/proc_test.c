@@ -137,7 +137,7 @@ static void proc_test_1()
 
 void proc_test()
 {
-    printk("proc_test\n");
+    printk("=============proc_test===============\n");
     auto p = create_proc();
     int pid = start_proc(p, proc_test_1, 0);
     int t = 0;
@@ -152,5 +152,5 @@ void proc_test()
             t |= 1 << (code - 20);
     }
     ASSERT(t == 1048575);
-    printk("proc_test PASS\n");
+    printk("===========proc_test PASS===========\n");
 }
