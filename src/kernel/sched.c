@@ -91,6 +91,19 @@ bool _activate_proc(Proc *p, bool onalert)
     // if the proc->state is RUNNING/RUNNABLE, do nothing and return false
     // if the proc->state is SLEEPING/UNUSED, set the process state to RUNNABLE, add it to the sched queue, and return true
     // if the proc->state is DEEPSLEEPING, do nothing if onalert or activate it if else, and return the corresponding value.
+    acquire_sched_lock();
+    if (p->state==RUNNING || p->state==RUNNABLE || p->state==ZOMBIE ||
+        (p->state==DEEPSLEEPING && onalert)) {
+        release_sched_lock();
+        return false;
+    }
+    if (p->state==SLEEPING || p->state==UNUSED ||
+        (p->state==DEEPSLEEPING && !onalert)) {
+        p->state = RUNNABLE;
+        _insert_into_list(&rq, &p->schinfo.rqnode);
+    }
+    release_sched_lock();
+    return true;
 }
 
 static void update_this_state(enum procstate new_state) {

@@ -251,7 +251,7 @@ int kill(int pid)
     if (kill_proc) {
         acquire_spinlock(&proclock);
         kill_proc->killed = true;
-        activate_proc(kill_proc);
+        alert_proc(kill_proc);
         release_spinlock(&proclock);
         return 0;
     }
