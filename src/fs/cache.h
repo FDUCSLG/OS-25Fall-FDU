@@ -47,6 +47,13 @@ typedef struct {
     bool acquired;
 
     /**
+        @brief the reference count of the block.
+
+        @note should be protected by the global lock of the block cache.
+     */
+    int refcnt;
+
+    /**
         @brief is the block pinned?
 
         A pinned block should not be evicted from the cache.

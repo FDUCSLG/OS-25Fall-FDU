@@ -317,3 +317,17 @@ static ALWAYS_INLINE NO_RETURN void arch_stop_cpu()
 void delay_us(u64 n);
 u64 psci_cpu_on(u64 cpuid, u64 ep);
 void smp_init();
+
+static inline u64 arch_get_currentel()
+{
+    u64 result;
+    asm volatile("mrs %[x], CurrentEL" : [x] "=r"(result));
+    return result; // bits[3:2] indicate EL (e.g., 0x4 for EL1, 0x0 for EL0)
+}
+
+static inline u64 arch_get_sctlr()
+{
+    u64 result;
+    asm volatile("mrs %[x], sctlr_el1" : [x] "=r"(result));
+    return result;
+}
