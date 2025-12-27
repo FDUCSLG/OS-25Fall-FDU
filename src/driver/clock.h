@@ -1,0 +1,11 @@
+#pragma once
+
+#include <common/defines.h>
+
+typedef void (*ClockHandler)(void);
+
+WARN_RESULT u64 get_timestamp_ms();
+void init_clock();
+void reset_clock(u64 interval_ms);
+void set_clock_handler(ClockHandler handler);
+void invoke_clock_handler();
