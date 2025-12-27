@@ -82,7 +82,7 @@ static void init_inode(Inode* inode) {
 static usize inode_alloc(OpContext* ctx, InodeType type) {
     //printk("[INODE] Allocating inode of type %d\n", type);
     ASSERT(type != INODE_INVALID);
-    //acquire_spinlock(&lock);
+    acquire_spinlock(&lock);
     for (usize i = 1; i < sblock->num_inodes; i++) {
         // search for a free inode
         Block* block = cache->acquire(to_block_no(i));
@@ -98,7 +98,7 @@ static usize inode_alloc(OpContext* ctx, InodeType type) {
         }
         cache->release(block);
     }
-    //release_spinlock(&lock);
+    release_spinlock(&lock);
     PANIC();
     return 0;
 }
